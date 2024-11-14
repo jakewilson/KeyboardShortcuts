@@ -368,4 +368,15 @@ extension KeyboardShortcuts.Shortcut {
 		return KeyboardShortcut(.init(character), modifiers: modifiers.toEventModifiers)
 	}
 }
+
+extension KeyboardShortcuts.Shortcut {
+	/** given an NSEvent, return whether the event keycode is the same as the shortcut key, including checking the modifiers */
+	public func doesMatchEvent(_ event: NSEvent) -> Bool {
+		guard event.keyCode == carbonKeyCode else {
+			return false
+		}
+
+		return modifiers.isSubset(of: event.modifierFlags)
+	}
+}
 #endif
