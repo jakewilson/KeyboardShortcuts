@@ -58,6 +58,12 @@ extension KeyboardShortcuts {
 			}
 		}
 
+		public var isLocal: Bool {
+			didSet {
+				// TODO if changing to global, make sure they use either option or command
+			}
+		}
+
 		/// :nodoc:
 		override public var canBecomeKeyView: Bool { canBecomeKey }
 
@@ -83,10 +89,12 @@ extension KeyboardShortcuts {
 		*/
 		public required init(
 			for name: Name,
-			onChange: ((_ shortcut: Shortcut?) -> Void)? = nil
+			onChange: ((_ shortcut: Shortcut?) -> Void)? = nil,
+			isLocal: Bool = false
 		) {
 			self.shortcutName = name
 			self.onChange = onChange
+			self.isLocal = isLocal
 
 			super.init(frame: .zero)
 			self.delegate = self
@@ -262,10 +270,19 @@ extension KeyboardShortcuts {
 					return nil
 				}
 
-				// The “shift” key is not allowed without other modifiers or a function key, since it doesn't actually work.
+				if !isLocal {
+					// for global shortcuts:
+					// The “shift” key is not allowed without other modifiers or a function key, since it doesn't actually work.
+					guard
+						!event.modifiers.subtracting([.shift, .function]).isEmpty
+							|| event.specialKey?.isFunctionKey == true
+					else {
+						NSSound.beep()
+						return nil
+					}
+				}
+
 				guard
-					!event.modifiers.subtracting([.shift, .function]).isEmpty
-						|| event.specialKey?.isFunctionKey == true,
 					let shortcut = Shortcut(event: event)
 				else {
 					NSSound.beep()

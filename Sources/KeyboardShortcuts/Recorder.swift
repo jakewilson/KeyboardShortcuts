@@ -7,13 +7,15 @@ extension KeyboardShortcuts {
 
 		let name: Name
 		let onChange: ((_ shortcut: Shortcut?) -> Void)?
+		let isLocal: Bool
 
 		func makeNSView(context: Context) -> NSViewType {
-			.init(for: name, onChange: onChange)
+			.init(for: name, onChange: onChange, isLocal: isLocal)
 		}
 
 		func updateNSView(_ nsView: NSViewType, context: Context) {
 			nsView.shortcutName = name
+			nsView.isLocal = isLocal
 		}
 	}
 
@@ -46,17 +48,20 @@ extension KeyboardShortcuts {
 		private let onChange: ((Shortcut?) -> Void)?
 		private let hasLabel: Bool
 		private let label: Label
+		private let isLocal: Bool
 
 		init(
 			for name: Name,
 			onChange: ((Shortcut?) -> Void)? = nil,
 			hasLabel: Bool,
-			@ViewBuilder label: () -> Label
+			@ViewBuilder label: () -> Label,
+			isLocal: Bool = false
 		) {
 			self.name = name
 			self.onChange = onChange
 			self.hasLabel = hasLabel
 			self.label = label()
+			self.isLocal = isLocal
 		}
 
 		public var body: some View {
@@ -65,7 +70,8 @@ extension KeyboardShortcuts {
 					LabeledContent {
 						_Recorder(
 							name: name,
-							onChange: onChange
+							onChange: onChange,
+							isLocal: isLocal
 						)
 					} label: {
 						label
@@ -73,7 +79,8 @@ extension KeyboardShortcuts {
 				} else {
 					_Recorder(
 						name: name,
-						onChange: onChange
+						onChange: onChange,
+						isLocal: isLocal
 					)
 						.formLabel {
 							label
@@ -82,7 +89,8 @@ extension KeyboardShortcuts {
 			} else {
 				_Recorder(
 					name: name,
-					onChange: onChange
+					onChange: onChange,
+					isLocal: isLocal
 				)
 			}
 		}
@@ -96,12 +104,14 @@ extension KeyboardShortcuts.Recorder<EmptyView> {
 	*/
 	public init(
 		for name: KeyboardShortcuts.Name,
-		onChange: ((KeyboardShortcuts.Shortcut?) -> Void)? = nil
+		onChange: ((KeyboardShortcuts.Shortcut?) -> Void)? = nil,
+		isLocal: Bool = false
 	) {
 		self.init(
 			for: name,
 			onChange: onChange,
-			hasLabel: false
+			hasLabel: false,
+			isLocal: isLocal
 		) {}
 	}
 }
